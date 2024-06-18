@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Skin Optimizer</title>
+    <title>Skin Optimizer</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <script>
@@ -12,15 +12,45 @@
             var formData = new FormData(document.getElementById('uploadForm'));
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/process-image', true);
-            xhr.responseType = 'blob'; 
+            xhr.responseType = 'blob';
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    var img = document.createElement('img');
-                    img.src = URL.createObjectURL(xhr.response);
-                    img.style.maxWidth = '100%';
+                    var skinUrl = URL.createObjectURL(xhr.response);
+
+                    var rawImg = document.createElement('img');
+                    rawImg.src = skinUrl;
+                    rawImg.style.maxWidth = '100%';
+                    document.getElementById('rawSkin').innerHTML = '';
+                    document.getElementById('rawSkin').appendChild(rawImg);
+
+                    var canvas = document.createElement('canvas');
+                    canvas.id = 'skin_canvas';
+                    canvas.width = 128; 
+                    canvas.height = 128;
+                    
                     document.getElementById('output').innerHTML = '';
-                    document.getElementById('output').appendChild(img);
+                    document.getElementById('output').appendChild(canvas);
+
+                    var context = canvas.getContext('2d');
+                    var skinImage = new Image();
+                    skinImage.onload = function() {
+                        // Draw head front (8x8)
+                        context.drawImage(skinImage, 8, 8, 8, 8, 28, 0, 8, 8);
+                        // Draw body front (8x12)
+                        context.drawImage(skinImage, 20, 20, 8, 12, 28, 8, 8, 12);
+                        // Draw left arm front (4x12)
+                        context.drawImage(skinImage, 44, 20, 4, 12, 24, 8, 4, 12); // Adjusted coordinates for left arm
+                        
+                        // Draw right arm front (4x12)
+                        context.drawImage(skinImage, 36, 52, 4, 12, 36, 8, 4, 12); // Adjusted coordinates for right arm
+                        
+                        // Draw left leg front (4x12)
+                        context.drawImage(skinImage, 4, 20, 4, 12, 28, 20, 4, 12);
+                        // Draw right leg front (4x12)
+                        context.drawImage(skinImage, 20, 52, 4, 12, 32, 20, 4, 12);
+                    };
+                    skinImage.src = skinUrl;
                 } else {
                     alert('An error occurred!');
                 }
@@ -33,9 +63,10 @@
 <body>
     <h1>Upload a 64x64 Skin.png</h1>
     <form id="uploadForm" onsubmit="uploadFile(event)" enctype="multipart/form-data">
-        <input type="file" name="file">
+        <input type="file" name="file" required>
         <input type="submit" value="Upload">
     </form>
     <div id="output"></div>
+    <div id="rawSkin"></div>
 </body>
 </html>
