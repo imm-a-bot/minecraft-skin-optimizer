@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Skin Optimizer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function uploadFile(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('uploadForm'));
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/process-image', true);
+            xhr.responseType = 'blob'; 
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(xhr.response);
+                    img.style.maxWidth = '100%';
+                    document.getElementById('output').innerHTML = '';
+                    document.getElementById('output').appendChild(img);
+                } else {
+                    alert('An error occurred!');
+                }
+            };
+
+            xhr.send(formData);
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload a 64x64 Skin.png</h1>
+    <form id="uploadForm" onsubmit="uploadFile(event)" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+    <div id="output"></div>
+</body>
+</html>
